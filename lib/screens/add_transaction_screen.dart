@@ -38,6 +38,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   }
 
   void _presentDatePicker() {
+    final theme = Theme.of(context);
     showDatePicker(
       context: context,
       initialDate: _selectedDate,
@@ -45,12 +46,12 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.dark(
-              primary: Colors.tealAccent.shade400,
-              onPrimary: Colors.black,
-              surface: Colors.grey.shade900,
-              onSurface: Colors.white,
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: theme.colorScheme.primary,
+              onPrimary: theme.brightness == Brightness.dark ? Colors.black : Colors.white,
+              surface: theme.colorScheme.surface,
+              onSurface: theme.colorScheme.onSurface,
             ),
           ),
           child: child!,
@@ -91,12 +92,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<BudgetProvider>(context);
     final categories = _isIncome ? provider.incomeCategories : provider.expenseCategories;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final inputFillColor = isDark ? const Color(0xFF1E2025) : const Color(0xFFEEF0F6);
+    final inputBorderColor = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
 
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
         title: Text(
           widget.transaction == null ? 'Add Transaction' : 'Edit Transaction',
           style: const TextStyle(fontWeight: FontWeight.bold),
@@ -112,10 +115,11 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               // Toggle Income/Expense
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(4.0),
+                padding: const EdgeInsets.all(6.0),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade900,
-                  borderRadius: BorderRadius.circular(16),
+                  color: inputFillColor,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: inputBorderColor),
                 ),
                 child: Row(
                   children: [
@@ -130,14 +134,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           decoration: BoxDecoration(
-                            color: !_isIncome ? Colors.redAccent.shade200.withOpacity(0.2) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(12),
+                            color: !_isIncome ? theme.colorScheme.secondary.withOpacity(0.2) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
                             child: Text(
                               'Expense',
                               style: TextStyle(
-                                color: !_isIncome ? Colors.redAccent.shade200 : Colors.white60,
+                                color: !_isIncome ? theme.colorScheme.secondary : theme.colorScheme.onSurface.withOpacity(0.6),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -156,14 +160,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           decoration: BoxDecoration(
-                            color: _isIncome ? Colors.tealAccent.shade400.withOpacity(0.2) : Colors.transparent,
-                            borderRadius: BorderRadius.circular(12),
+                            color: _isIncome ? theme.colorScheme.primary.withOpacity(0.2) : Colors.transparent,
+                            borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
                             child: Text(
                               'Income',
                               style: TextStyle(
-                                color: _isIncome ? Colors.tealAccent.shade400 : Colors.white60,
+                                color: _isIncome ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -175,45 +179,47 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+
               // Title Field
               TextFormField(
                 initialValue: _title,
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Title',
-                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                   filled: true,
-                  fillColor: const Color(0xFF0C0C0C),
+                  fillColor: inputFillColor,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: inputBorderColor),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.tealAccent.shade400),
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
                   ),
                 ),
                 validator: (val) => val == null || val.trim().isEmpty ? 'Please enter a title' : null,
                 onSaved: (val) => _title = val!.trim(),
               ),
               const SizedBox(height: 16),
+
               // Amount Field
               TextFormField(
                 initialValue: _amount > 0 ? _amount.toString() : '',
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                style: const TextStyle(color: Colors.white, fontSize: 16),
+                style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Amount (LKR)',
-                  labelStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                  labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
                   filled: true,
-                  fillColor: const Color(0xFF0C0C0C),
+                  fillColor: inputFillColor,
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.white.withOpacity(0.05)),
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: inputBorderColor),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide(color: Colors.tealAccent.shade400),
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: theme.colorScheme.primary, width: 2),
                   ),
                 ),
                 validator: (val) {
@@ -224,57 +230,64 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 },
                 onSaved: (val) => _amount = double.parse(val!),
               ),
-              const SizedBox(height: 20),
-              // Date Row
+              const SizedBox(height: 16),
+
+              // Date Selector
               GestureDetector(
                 onTap: _presentDatePicker,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0C0C0C),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    color: inputFillColor,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: inputBorderColor),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Date: ${DateFormat('MMMM dd, yyyy').format(_selectedDate)}',
-                        style: const TextStyle(color: Colors.white, fontSize: 15),
+                        style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 15),
                       ),
-                      Icon(Icons.calendar_today_rounded, color: Colors.tealAccent.shade400, size: 20),
+                      Icon(Icons.calendar_today_rounded, color: theme.colorScheme.primary, size: 20),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 24),
+
               // Categories Header
               Text(
                 'Category',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: theme.colorScheme.onSurface.withOpacity(0.9),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 12),
+
               // Choice Chips
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: categories.map((cat) {
                   final isSelected = _selectedCategory == cat;
+                  final chipColor = _isIncome ? theme.colorScheme.primary : theme.colorScheme.secondary;
+
                   return ChoiceChip(
                     label: Text(
                       cat,
                       style: TextStyle(
-                        color: isSelected ? Colors.black : Colors.white.withOpacity(0.7),
+                        color: isSelected
+                            ? (isDark ? Colors.black : Colors.white)
+                            : theme.colorScheme.onSurface.withOpacity(0.7),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     selected: isSelected,
-                    selectedColor: _isIncome ? Colors.tealAccent.shade400 : Colors.redAccent.shade200,
-                    backgroundColor: const Color(0xFF0C0C0C),
+                    selectedColor: chipColor,
+                    backgroundColor: inputFillColor,
                     onSelected: (selected) {
                       if (selected) {
                         setState(() {
@@ -283,31 +296,32 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       }
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       side: BorderSide(
-                        color: isSelected ? Colors.transparent : Colors.white.withOpacity(0.05),
+                        color: isSelected ? Colors.transparent : inputBorderColor,
                       ),
                     ),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 40),
+
               // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 54,
+                height: 56,
                 child: ElevatedButton(
                   onPressed: _saveForm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: _isIncome ? Colors.tealAccent.shade400 : Colors.redAccent.shade200,
+                    backgroundColor: _isIncome ? theme.colorScheme.primary : theme.colorScheme.secondary,
+                    foregroundColor: isDark ? Colors.black : Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   child: Text(
                     widget.transaction == null ? 'Save Transaction' : 'Update Transaction',
                     style: const TextStyle(
-                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),

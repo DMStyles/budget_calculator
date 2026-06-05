@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../database/database_helper.dart';
 import '../models/transaction.dart';
 
@@ -14,6 +15,7 @@ class BudgetProvider extends ChangeNotifier {
     'Utilities',
     'Entertainment',
     'Shopping',
+    'Saving',
     'Other'
   ];
 
@@ -33,12 +35,44 @@ class BudgetProvider extends ChangeNotifier {
     'Utilities': 300.0,
     'Entertainment': 150.0,
     'Shopping': 250.0,
+    'Saving': 1000.0,
     'Other': 100.0,
   };
+
+  ThemeMode _themeMode = ThemeMode.system;
+
+  BudgetProvider() {
+    _loadThemeFromPrefs();
+  }
+
+  Future<void> _loadThemeFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final modeIndex = prefs.getInt('theme_mode');
+      if (modeIndex != null) {
+        _themeMode = ThemeMode.values[modeIndex];
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('Error loading theme from prefs: $e');
+    }
+  }
 
   List<TransactionModel> get transactions => _transactions;
   bool get isLoading => _isLoading;
   Map<String, double> get categoryBudgets => _categoryBudgets;
+  ThemeMode get themeMode => _themeMode;
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('theme_mode', mode.index);
+    } catch (e) {
+      debugPrint('Error saving theme to prefs: $e');
+    }
+  }
 
   Future<void> fetchTransactions() async {
     _isLoading = true;

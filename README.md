@@ -1,4 +1,4 @@
-# GlassBudget 📊
+# Glass Budget 📊
 
 > A premium, offline-first Budget Calculator app for Android with **Sri Lankan Rupees (LKR)** support — built with Flutter.
 
@@ -15,9 +15,9 @@ Get the latest optimized release APK directly for your device:
 
 | APK | Architecture | Size | Best For |
 |-----|-------------|------|----------|
-| [app-arm64-v8a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.0.0/app-arm64-v8a-release.apk) | ARM 64-bit | 16.7 MB | ✅ All modern phones (2018+) |
-| [app-armeabi-v7a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.0.0/app-armeabi-v7a-release.apk) | ARM 32-bit | 14.2 MB | Older phones |
-| [app-x86_64-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.0.0/app-x86_64-release.apk) | x86_64 | 18.0 MB | Emulators |
+| [Glass_Budget-arm64-v8a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-arm64-v8a-release.apk) | ARM 64-bit | 18.0 MB | ✅ All modern phones (2018+) |
+| [Glass_Budget-armeabi-v7a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-armeabi-v7a-release.apk) | ARM 32-bit | 15.6 MB | Older phones |
+| [Glass_Budget-x86_64-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-x86_64-release.apk) | x86_64 | 19.4 MB | Emulators |
 
 > **Not sure which to pick?** Install the `arm64-v8a` APK — it works on virtually all Android phones from the last 6+ years.
 
@@ -26,11 +26,13 @@ Get the latest optimized release APK directly for your device:
 ## ✨ Features
 
 - 💰 **Real-Time Financial Dashboard** — Instantly view your remaining balance, total income, and total expenses in LKR (Rs.)
-- 🍩 **Interactive Expense Charts** — Visualizes category-wise spending with interactive pie charts
-- 🎯 **Category Budget Goals** — Set custom budget limits per category with live progress bars and overspend alerts
-- 📝 **Transaction Manager** — Add, edit, or swipe-to-delete income and expense transactions
-- 📴 **Fully Offline** — All data stored securely on-device using SQLite, no internet required
-- 🌙 **Premium Dark Mode UI** — Glassmorphism-inspired design with vibrant teal and red accents
+- 📊 **Monthly Reports & Insights** — Beautiful monthly analytics sheets showing total income/spending breakdowns, daily spending averages, top spending categories, net savings, and savings rate.
+- ⚙️ **Settings & Preferences** — Toggle between Light Mode, Slate Charcoal Dark Mode, or Follow System.
+- 🔄 **GitHub Update Checker** — Check for updates directly inside the app with release note view and in-app update launch prompts.
+- 🍩 **Interactive Expense Charts** — Visualizes category-wise spending with interactive pie charts, now featuring a dedicated **Saving** category.
+- 🎯 **Category Budget Goals** — Set custom budget limits per category (now including savings allocations) with live progress bars and overspend alerts.
+- 📝 **Transaction Manager** — Add, edit, or swipe-to-delete income and expense transactions.
+- 📴 **Fully Offline & Secure** — All data stored locally using SQLite, respecting user privacy.
 
 ---
 
@@ -41,6 +43,8 @@ Get the latest optimized release APK directly for your device:
 | Framework | Flutter (Dart) |
 | State Management | Provider |
 | Local Database | sqflite (SQLite) |
+| Preferences | shared_preferences |
+| Network & Updates | http & package_info_plus |
 | Charts | fl_chart |
 | Date & Formatting | intl |
 
@@ -66,12 +70,11 @@ flutter run
 flutter build apk --release --split-per-abi
 ```
 
-Output files will be located at:
+Rename and locate the output files:
 ```
-build/app/outputs/flutter-apk/
-  ├── app-arm64-v8a-release.apk    (16.7 MB)
-  ├── app-armeabi-v7a-release.apk  (14.2 MB)
-  └── app-x86_64-release.apk       (18.0 MB)
+Glass_Budget-arm64-v8a-release.apk    (18.0 MB)
+Glass_Budget-armeabi-v7a-release.apk  (15.6 MB)
+Glass_Budget-x86_64-release.apk       (19.4 MB)
 ```
 
 ---
@@ -80,18 +83,20 @@ build/app/outputs/flutter-apk/
 
 ```
 lib/
-├── main.dart                        # App entry, theme, provider setup
+├── main.dart                        # App entry, Material 3 navigation hub, theme config
 ├── models/
 │   └── transaction.dart             # Transaction data model
 ├── database/
 │   └── database_helper.dart         # SQLite CRUD operations
 ├── providers/
-│   └── budget_provider.dart         # Global state (ChangeNotifier)
+│   └── budget_provider.dart         # Global state & settings preferences provider
 ├── screens/
 │   ├── dashboard_screen.dart        # Main dashboard view
+│   ├── reports_screen.dart          # Monthly report sheets & insights
+│   ├── settings_screen.dart         # App settings, theme selectors, update checker
 │   └── add_transaction_screen.dart  # Add/Edit transaction form
 └── widgets/
-    ├── expense_chart.dart            # Pie chart visualization
+    ├── expense_chart.dart            # Pie chart breakdown
     └── transaction_list.dart         # Swipeable transaction list
 ```
 
