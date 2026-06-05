@@ -70,6 +70,16 @@ class DatabaseHelper {
     );
   }
 
+  Future<int> updateTransactionCategory(String oldCategory, String newCategory, bool isIncome) async {
+    final db = await instance.database;
+    return await db.update(
+      'transactions',
+      {'category': newCategory},
+      where: 'category = ? AND isIncome = ?',
+      whereArgs: [oldCategory, isIncome ? 1 : 0],
+    );
+  }
+
   Future close() async {
     final db = await instance.database;
     db.close();

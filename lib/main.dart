@@ -34,7 +34,6 @@ class MyApp extends StatelessWidget {
         secondary: Color(0xFFF2B8B5), // Soft Coral/Red
         tertiary: Color(0xFFC4EED0), // Soft Mint Green
         surface: Color(0xFF1E2025), // Dark surface
-        background: Color(0xFF121318),
       ),
       fontFamily: 'Roboto',
       cardTheme: CardThemeData(
@@ -59,7 +58,6 @@ class MyApp extends StatelessWidget {
         secondary: Color(0xFFB3261E), // Red
         tertiary: Color(0xFF146C2E), // Green
         surface: Color(0xFFEEF0F6), // Soft grey surface
-        background: Color(0xFFF8F9FC),
       ),
       fontFamily: 'Roboto',
       cardTheme: CardThemeData(
@@ -119,7 +117,7 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
           });
         },
         backgroundColor: isDark ? const Color(0xFF1E2025) : const Color(0xFFEEF0F6),
-        indicatorColor: isDark ? const Color(0xFF004A77).withOpacity(0.4) : const Color(0xFFC2E7FF),
+        indicatorColor: isDark ? const Color(0xFF004A77).withValues(alpha: 0.4) : const Color(0xFFC2E7FF),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),

@@ -32,7 +32,7 @@ class _ExpenseChartState extends State<ExpenseChart> {
     final isDark = theme.brightness == Brightness.dark;
 
     final cardBg = isDark ? const Color(0xFF1E2025) : const Color(0xFFEEF0F6);
-    final borderCol = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+    final borderCol = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     if (distribution.isEmpty) {
       return Container(
@@ -57,13 +57,13 @@ class _ExpenseChartState extends State<ExpenseChart> {
             Icon(
               Icons.pie_chart_outline_rounded,
               size: 64,
-              color: theme.colorScheme.onSurface.withOpacity(0.2),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
             ),
             const SizedBox(height: 16),
             Text(
               'No expenses recorded yet',
               style: TextStyle(
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                 fontSize: 14,
               ),
             ),
@@ -162,7 +162,7 @@ class _ExpenseChartState extends State<ExpenseChart> {
                   Text(
                     '$cat (Rs. ${spent.toStringAsFixed(0)})',
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontSize: 12,
                     ),
                   ),

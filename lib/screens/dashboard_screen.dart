@@ -16,9 +16,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => Provider.of<BudgetProvider>(context, listen: false).fetchTransactions(),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<BudgetProvider>(context, listen: false).fetchTransactions();
+      }
+    });
   }
 
   void _showSetBudgetDialog(BuildContext context, String category, double currentLimit) {
@@ -41,10 +43,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           keyboardType: TextInputType.number,
           decoration: InputDecoration(
             labelText: 'Limit Amount (LKR)',
-            labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+            labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(color: theme.colorScheme.onSurface.withOpacity(0.12)),
+              borderSide: BorderSide(color: theme.colorScheme.onSurface.withValues(alpha: 0.12)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
@@ -86,7 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     // Premium Color System
     final surfaceColor = isDark ? const Color(0xFF1E2025) : const Color(0xFFEEF0F6);
-    final outlineColor = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+    final outlineColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
       appBar: AppBar(
@@ -95,7 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withOpacity(0.15),
+                color: theme.colorScheme.primary.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.account_balance_wallet_rounded, color: theme.colorScheme.primary, size: 24),
@@ -128,9 +130,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.1),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: theme.colorScheme.primary.withOpacity(0.2)),
+                  border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,7 +140,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text(
                       'TOTAL BALANCE',
                       style: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.6),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1.2,
@@ -180,7 +182,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Text(
                                 'Income',
                                 style: TextStyle(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -218,7 +220,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               Text(
                                 'Expenses',
                                 style: TextStyle(
-                                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -293,7 +295,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                       Icon(
                                         Icons.edit_rounded,
                                         size: 14,
-                                        color: theme.colorScheme.onSurface.withOpacity(0.4),
+                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                                       ),
                                     ],
                                   ),
@@ -301,7 +303,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Text(
                                   'Rs. ${spent.toStringAsFixed(0)} / Rs. ${limit.toStringAsFixed(0)}',
                                   style: TextStyle(
-                                    color: limitExceeded ? theme.colorScheme.secondary : theme.colorScheme.onSurface.withOpacity(0.7),
+                                    color: limitExceeded ? theme.colorScheme.secondary : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                                     fontSize: 13,
                                   ),
                                 ),
@@ -312,7 +314,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               borderRadius: BorderRadius.circular(8),
                               child: LinearProgressIndicator(
                                 value: usage.clamp(0.0, 1.0),
-                                backgroundColor: isDark ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.5),
+                                backgroundColor: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.white.withValues(alpha: 0.5),
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   limitExceeded
                                       ? theme.colorScheme.secondary
@@ -348,7 +350,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Text(
                       'Swipe left to delete',
                       style: TextStyle(
-                        color: theme.colorScheme.onSurface.withOpacity(0.4),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                         fontSize: 11,
                       ),
                     ),

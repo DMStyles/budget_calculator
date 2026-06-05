@@ -72,7 +72,7 @@ class TransactionList extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     final surfaceColor = isDark ? const Color(0xFF1E2025) : const Color(0xFFEEF0F6);
-    final outlineColor = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+    final outlineColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     if (list.isEmpty) {
       return Center(
@@ -84,13 +84,13 @@ class TransactionList extends StatelessWidget {
               Icon(
                 Icons.receipt_long_rounded,
                 size: 56,
-                color: theme.colorScheme.onSurface.withOpacity(0.2),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
               ),
               const SizedBox(height: 12),
               Text(
                 'No transactions yet',
                 style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.4),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                   fontSize: 15,
                 ),
               ),
@@ -114,9 +114,9 @@ class TransactionList extends StatelessWidget {
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
-              color: theme.colorScheme.error.withOpacity(0.15),
+              color: theme.colorScheme.error.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: theme.colorScheme.error.withOpacity(0.3)),
+              border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.3)),
             ),
             child: Icon(Icons.delete_sweep_rounded, color: theme.colorScheme.error),
           ),
@@ -172,7 +172,7 @@ class TransactionList extends StatelessWidget {
               leading: Container(
                 padding: const EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
-                  color: _getCategoryColor(tx.category).withOpacity(0.15),
+                  color: _getCategoryColor(tx.category).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -191,7 +191,7 @@ class TransactionList extends StatelessWidget {
               subtitle: Text(
                 DateFormat('MMM dd, yyyy').format(tx.date),
                 style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   fontSize: 12,
                 ),
               ),
@@ -210,7 +210,7 @@ class TransactionList extends StatelessWidget {
                   Text(
                     tx.category,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface.withOpacity(0.3),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
                       fontSize: 11,
                     ),
                   ),

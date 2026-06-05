@@ -96,7 +96,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final inputFillColor = isDark ? const Color(0xFF1E2025) : const Color(0xFFEEF0F6);
-    final inputBorderColor = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+    final inputBorderColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
       appBar: AppBar(
@@ -134,14 +134,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           decoration: BoxDecoration(
-                            color: !_isIncome ? theme.colorScheme.secondary.withOpacity(0.2) : Colors.transparent,
+                            color: !_isIncome ? theme.colorScheme.secondary.withValues(alpha: 0.2) : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
                             child: Text(
                               'Expense',
                               style: TextStyle(
-                                color: !_isIncome ? theme.colorScheme.secondary : theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: !_isIncome ? theme.colorScheme.secondary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -160,14 +160,14 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
                           decoration: BoxDecoration(
-                            color: _isIncome ? theme.colorScheme.primary.withOpacity(0.2) : Colors.transparent,
+                            color: _isIncome ? theme.colorScheme.primary.withValues(alpha: 0.2) : Colors.transparent,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Center(
                             child: Text(
                               'Income',
                               style: TextStyle(
-                                color: _isIncome ? theme.colorScheme.primary : theme.colorScheme.onSurface.withOpacity(0.6),
+                                color: _isIncome ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -186,7 +186,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Title',
-                  labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   filled: true,
                   fillColor: inputFillColor,
                   enabledBorder: OutlineInputBorder(
@@ -210,7 +210,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                 style: TextStyle(color: theme.colorScheme.onSurface, fontSize: 16),
                 decoration: InputDecoration(
                   labelText: 'Amount (LKR)',
-                  labelStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)),
+                  labelStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   filled: true,
                   fillColor: inputFillColor,
                   enabledBorder: OutlineInputBorder(
@@ -260,7 +260,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               Text(
                 'Category',
                 style: TextStyle(
-                  color: theme.colorScheme.onSurface.withOpacity(0.9),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -281,7 +281,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                       style: TextStyle(
                         color: isSelected
                             ? (isDark ? Colors.black : Colors.white)
-                            : theme.colorScheme.onSurface.withOpacity(0.7),
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         fontWeight: FontWeight.bold,
                       ),
                     ),

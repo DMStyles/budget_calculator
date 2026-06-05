@@ -87,7 +87,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     // Dynamic Pixel UI Colors
     final surfaceColor = isDark ? const Color(0xFF1E2025) : const Color(0xFFF0F4F9);
-    final outlineColor = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+    final outlineColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
       appBar: AppBar(
@@ -164,7 +164,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 40.0),
                   child: Column(
                     children: [
-                      Icon(Icons.bar_chart_rounded, size: 72, color: Colors.grey.withOpacity(0.3)),
+                      Icon(Icons.bar_chart_rounded, size: 72, color: Colors.grey.withValues(alpha: 0.3)),
                       const SizedBox(height: 12),
                       const Text(
                         'No transactions recorded this month.',
@@ -260,7 +260,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: incomePercent,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  backgroundColor: Colors.grey.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.tealAccent.shade400),
                   minHeight: 12,
                 ),
@@ -278,7 +278,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: expensePercent,
-                  backgroundColor: Colors.grey.withOpacity(0.1),
+                  backgroundColor: Colors.grey.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent.shade200),
                   minHeight: 12,
                 ),
@@ -348,7 +348,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor, size: 20),
@@ -415,7 +415,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     borderRadius: BorderRadius.circular(8),
                     child: LinearProgressIndicator(
                       value: percent,
-                      backgroundColor: Colors.grey.withOpacity(0.1),
+                      backgroundColor: Colors.grey.withValues(alpha: 0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(catColor),
                       minHeight: 8,
                     ),

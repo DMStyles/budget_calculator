@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/budget_provider.dart';
+import 'manage_categories_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -124,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.05),
+                  color: Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(notes, style: const TextStyle(fontSize: 13, height: 1.4)),
@@ -187,7 +188,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final surfaceColor = isDark ? const Color(0xFF1E2025) : const Color(0xFFF0F4F9);
-    final outlineColor = isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.05);
+    final outlineColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
       appBar: AppBar(
@@ -246,6 +247,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
 
+            // Settings Group: Categories
+            _buildSectionHeader('Categories'),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: outlineColor),
+              ),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                leading: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.purpleAccent.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.category_rounded, color: Colors.purpleAccent.shade100),
+                ),
+                title: const Text('Manage Categories', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: const Text('Add, rename, or delete categories'),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const ManageCategoriesScreen(),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // Settings Group: Updates & Maintenance
             _buildSectionHeader('App Updates'),
             const SizedBox(height: 8),
@@ -260,7 +294,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.blueAccent.shade100.withOpacity(0.1),
+                    color: Colors.blueAccent.shade100.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(Icons.cloud_download_rounded, color: Colors.blueAccent.shade100),
@@ -386,7 +420,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? colorScheme.primary.withOpacity(0.15) : Colors.grey.withOpacity(0.1),
+          color: isSelected ? colorScheme.primary.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -415,7 +449,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       thickness: 1,
       indent: 68,
       endIndent: 20,
-      color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+      color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
     );
   }
 }
