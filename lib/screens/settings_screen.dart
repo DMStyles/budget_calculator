@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -41,19 +42,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      // Call GitHub API for latest release
+      // Call GitHub API for latest release (with 10s timeout)
       final response = await http.get(
         Uri.parse('https://api.github.com/repos/DMStyles/budget_calculator/releases/latest'),
         headers: {'Accept': 'application/vnd.github.v3+json'},
-      );
+      ).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final latestTag = data['tag_name'] as String; // e.g. "v1.0.0"
+        final latestTag = data['tag_name'] as String; // e.g. "v1.1.1"
         final releaseNotes = data['body'] as String? ?? 'No release notes provided.';
         final releaseUrl = data['html_url'] as String;
 
-        // Compare versions (simple comparison, stripping 'v' prefix)
+        // Compare versions (stripping 'v' prefix and non-numeric chars)
         final remoteVersion = latestTag.replaceAll(RegExp(r'[^\d.]'), '');
         final localVersion = _appVersion.replaceAll(RegExp(r'[^\d.]'), '');
 
@@ -66,16 +67,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
         } else if (showUpToDateDialog) {
           _showUpToDateDialog(latestTag);
         }
+      } else if (response.statusCode == 404) {
+        throw Exception('No releases found yet. Check back later.');
       } else {
-        throw Exception('Failed to query releases');
+        throw Exception('Server returned HTTP ${response.statusCode}. Try again later.');
       }
     } catch (e) {
       debugPrint('Error checking updates: $e');
       if (!mounted) return;
+      final msg = e is Exception
+          ? e.toString().replaceFirst('Exception: ', '')
+          : e.toString();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to check for updates: $e'),
+          content: Text('Update check failed: $msg'),
           backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 5),
         ),
       );
     } finally {
