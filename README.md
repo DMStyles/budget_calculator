@@ -15,9 +15,9 @@ Get the latest optimized release APK directly for your device:
 
 | APK | Architecture | Size | Best For |
 |-----|-------------|------|----------|
-| [Glass_Budget-arm64-v8a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-arm64-v8a-release.apk) | ARM 64-bit | 18.0 MB | ✅ All modern phones (2018+) |
-| [Glass_Budget-armeabi-v7a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-armeabi-v7a-release.apk) | ARM 32-bit | 15.6 MB | Older phones |
-| [Glass_Budget-x86_64-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-x86_64-release.apk) | x86_64 | 19.4 MB | Emulators |
+| [Glass_Budget-v1.1.0-arm64-v8a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-v1.1.0-arm64-v8a-release.apk) | ARM 64-bit | 18.0 MB | ✅ All modern phones (2018+) |
+| [Glass_Budget-v1.1.0-armeabi-v7a-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-v1.1.0-armeabi-v7a-release.apk) | ARM 32-bit | 15.6 MB | Older phones |
+| [Glass_Budget-v1.1.0-x86_64-release.apk](https://github.com/DMStyles/budget_calculator/releases/download/v1.1.0/Glass_Budget-v1.1.0-x86_64-release.apk) | x86_64 | 19.4 MB | Emulators |
 
 > **Not sure which to pick?** Install the `arm64-v8a` APK — it works on virtually all Android phones from the last 6+ years.
 
@@ -72,9 +72,9 @@ flutter build apk --release --split-per-abi
 
 Rename and locate the output files:
 ```
-Glass_Budget-arm64-v8a-release.apk    (18.0 MB)
-Glass_Budget-armeabi-v7a-release.apk  (15.6 MB)
-Glass_Budget-x86_64-release.apk       (19.4 MB)
+Glass_Budget-v1.1.0-arm64-v8a-release.apk    (18.0 MB)
+Glass_Budget-v1.1.0-armeabi-v7a-release.apk  (15.6 MB)
+Glass_Budget-v1.1.0-x86_64-release.apk       (19.4 MB)
 ```
 
 ---
