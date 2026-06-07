@@ -1,4 +1,6 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/budget_provider.dart';
 import '../widgets/expense_chart.dart';
@@ -91,40 +93,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final outlineColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.account_balance_wallet_rounded, color: theme.colorScheme.primary, size: 24),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              'Glass Budget',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: provider.fetchTransactions,
-          ),
-        ],
-      ),
       body: RefreshIndicator(
         onRefresh: provider.fetchTransactions,
         color: theme.colorScheme.primary,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 120.0,
+              pinned: true,
+              backgroundColor: theme.scaffoldBackgroundColor.withValues(alpha: 0.7),
+              flexibleSpace: ClipRRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                  child: FlexibleSpaceBar(
+                    titlePadding: const EdgeInsets.only(left: 20, bottom: 16),
+                    title: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.account_balance_wallet_rounded, color: theme.colorScheme.primary, size: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Glass Budget',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    provider.fetchTransactions();
+                  },
+                ),
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               // Balance Card
               Container(
                 width: double.infinity,
@@ -363,8 +383,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+    ],
+  ),
+),
+floatingActionButton: FloatingActionButton(
         onPressed: () {
+          HapticFeedback.selectionClick();
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (_) => const AddTransactionScreen(),

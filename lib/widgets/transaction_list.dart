@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/transaction.dart';
@@ -78,23 +79,52 @@ class TransactionList extends StatelessWidget {
       return Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 40.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.receipt_long_rounded,
-                size: 56,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'No transactions yet',
-                style: TextStyle(
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                  fontSize: 15,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.8, end: 1.0),
+            duration: const Duration(seconds: 2),
+            curve: Curves.easeInOut,
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Opacity(
+                  opacity: value,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.receipt_long_rounded,
+                          size: 64,
+                          color: theme.colorScheme.primary.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'No transactions yet',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Tap the + button to add one',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       );
@@ -109,8 +139,17 @@ class TransactionList extends StatelessWidget {
 
         return Dismissible(
           key: Key(tx.id.toString()),
-          direction: DismissDirection.endToStart,
           background: Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(left: 20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+            ),
+            child: Icon(Icons.edit_rounded, color: theme.colorScheme.primary),
+          ),
+          secondaryBackground: Container(
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 20),
             decoration: BoxDecoration(
@@ -121,35 +160,48 @@ class TransactionList extends StatelessWidget {
             child: Icon(Icons.delete_sweep_rounded, color: theme.colorScheme.error),
           ),
           confirmDismiss: (direction) async {
-            return await showDialog<bool>(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28),
+            HapticFeedback.mediumImpact();
+            if (direction == DismissDirection.startToEnd) {
+              // Edit action (swipe right)
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => AddTransactionScreen(transaction: tx),
                 ),
-                title: const Text('Delete Transaction', style: TextStyle(fontWeight: FontWeight.bold)),
-                content: const Text('Are you sure you want to delete this transaction?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(false),
-                    child: Text('Cancel', style: TextStyle(color: theme.colorScheme.primary)),
+              );
+              return false; // Don't dismiss the item
+            } else {
+              // Delete action (swipe left)
+              return await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28),
                   ),
-                  ElevatedButton(
-                    onPressed: () => Navigator.of(ctx).pop(true),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: theme.colorScheme.error,
-                      foregroundColor: isDark ? Colors.black : Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  title: const Text('Delete Transaction', style: TextStyle(fontWeight: FontWeight.bold)),
+                  content: const Text('Are you sure you want to delete this transaction?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(ctx).pop(false),
+                      child: Text('Cancel', style: TextStyle(color: theme.colorScheme.primary)),
                     ),
-                    child: const Text('Delete'),
-                  ),
-                ],
-              ),
-            );
+                    ElevatedButton(
+                      onPressed: () => Navigator.of(ctx).pop(true),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.error,
+                        foregroundColor: isDark ? Colors.black : Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      child: const Text('Delete'),
+                    ),
+                  ],
+                ),
+              );
+            }
           },
           onDismissed: (direction) {
-            if (tx.id != null) {
+            if (direction == DismissDirection.endToStart && tx.id != null) {
               provider.deleteTransaction(tx.id!);
+              HapticFeedback.lightImpact();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('"${tx.title}" deleted'),
