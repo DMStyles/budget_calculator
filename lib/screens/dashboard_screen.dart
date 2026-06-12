@@ -458,7 +458,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 12),
               const TransactionList(),
-              const SizedBox(height: 80), // Padding to avoid overlap with FAB
+              const SizedBox(height: 120), // Padding to avoid overlap with glass nav bar + FAB
             ],
           ),
         ),
