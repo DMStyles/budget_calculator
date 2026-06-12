@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import '../database/database_helper.dart';
 import '../models/transaction.dart';
 
@@ -46,6 +48,7 @@ class BudgetProvider extends ChangeNotifier {
     _loadThemeFromPrefs();
     _loadCategoriesFromPrefs();
     _loadCategoryBudgetsFromPrefs();
+    checkForUpdates(); // Check for updates silently on startup
   }
 
   Future<void> _loadThemeFromPrefs() async {
@@ -297,5 +300,65 @@ class BudgetProvider extends ChangeNotifier {
       }
     }
     return distribution;
+  }
+
+  // Update checking state
+  bool _hasUpdate = false;
+  String _latestVersion = '';
+  String _updateUrl = '';
+  String _updateNotes = '';
+  bool _isCheckingUpdate = false;
+
+  bool get hasUpdate => _hasUpdate;
+  String get latestVersion => _latestVersion;
+  String get updateUrl => _updateUrl;
+  String get updateNotes => _updateNotes;
+  bool get isCheckingUpdate => _isCheckingUpdate;
+
+  Future<void> checkForUpdates() async {
+    _isCheckingUpdate = true;
+    notifyListeners();
+
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      final localVersion = packageInfo.version.replaceAll(RegExp(r'[^\d.]'), '');
+
+      final response = await http.get(
+        Uri.parse('https://api.github.com/repos/DMStyles/budget_calculator/releases/latest'),
+        headers: {'Accept': 'application/vnd.github.v3+json'},
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final latestTag = data['tag_name'] as String;
+        final releaseNotes = data['body'] as String? ?? 'No release notes provided.';
+        final releaseUrl = data['html_url'] as String;
+
+        final remoteVersion = latestTag.replaceAll(RegExp(r'[^\d.]'), '');
+
+        _hasUpdate = _isVersionNewer(localVersion, remoteVersion);
+        _latestVersion = latestTag;
+        _updateNotes = releaseNotes;
+        _updateUrl = releaseUrl;
+      }
+    } catch (e) {
+      debugPrint('Silent update check failed: $e');
+    } finally {
+      _isCheckingUpdate = false;
+      notifyListeners();
+    }
+  }
+
+  bool _isVersionNewer(String current, String latest) {
+    List<int> currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    List<int> latestParts = latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+
+    for (int i = 0; i < latestParts.length; i++) {
+      int currentVal = i < currentParts.length ? currentParts[i] : 0;
+      int latestVal = latestParts[i];
+      if (latestVal > currentVal) return true;
+      if (latestVal < currentVal) return false;
+    }
+    return false;
   }
 }

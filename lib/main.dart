@@ -123,6 +123,7 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
 
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<BudgetProvider>(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -166,20 +167,30 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
                 ? theme.colorScheme.primary.withValues(alpha: 0.2) 
                 : theme.colorScheme.primary.withValues(alpha: 0.2),
             elevation: 0,
-            destinations: const [
-              NavigationDestination(
+            destinations: [
+              const NavigationDestination(
                 icon: Icon(Icons.dashboard_outlined),
                 selectedIcon: Icon(Icons.dashboard_rounded),
                 label: 'Home',
               ),
-              NavigationDestination(
+              const NavigationDestination(
                 icon: Icon(Icons.analytics_outlined),
                 selectedIcon: Icon(Icons.analytics_rounded),
                 label: 'Reports',
               ),
               NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings_rounded),
+                icon: provider.hasUpdate
+                    ? Badge(
+                        backgroundColor: theme.colorScheme.error,
+                        child: const Icon(Icons.settings_outlined),
+                      )
+                    : const Icon(Icons.settings_outlined),
+                selectedIcon: provider.hasUpdate
+                    ? Badge(
+                        backgroundColor: theme.colorScheme.error,
+                        child: const Icon(Icons.settings_rounded),
+                      )
+                    : const Icon(Icons.settings_rounded),
                 label: 'Settings',
               ),
             ],

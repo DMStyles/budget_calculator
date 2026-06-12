@@ -309,15 +309,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Icon(Icons.cloud_download_rounded, color: Colors.blueAccent.shade100),
                 ),
                 title: const Text('Check for Updates', style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text('Current version: v$_appVersion'),
+                subtitle: Text(provider.hasUpdate
+                    ? 'New update available: ${provider.latestVersion}'
+                    : 'Current version: v$_appVersion'),
                 trailing: _isCheckingForUpdates
                     ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.tealAccent),
                       )
-                    : const Icon(Icons.chevron_right_rounded),
-                onTap: _isCheckingForUpdates ? null : () => _checkForUpdates(true),
+                    : (provider.hasUpdate
+                        ? Icon(Icons.info_outline, color: theme.colorScheme.error)
+                        : const Icon(Icons.chevron_right_rounded)),
+                onTap: _isCheckingForUpdates
+                    ? null
+                    : () {
+                        if (provider.hasUpdate) {
+                          _showUpdateDialog(
+                            provider.latestVersion,
+                            provider.updateNotes,
+                            provider.updateUrl,
+                          );
+                        } else {
+                          _checkForUpdates(true);
+                        }
+                      },
               ),
             ),
             const SizedBox(height: 24),
