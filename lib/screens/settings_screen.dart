@@ -42,11 +42,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
 
     try {
-      // Call GitHub API for latest release (with 10s timeout)
+      // Call GitHub API for latest release (with 30s timeout)
       final response = await http.get(
         Uri.parse('https://api.github.com/repos/DMStyles/budget_calculator/releases/latest'),
         headers: {'Accept': 'application/vnd.github.v3+json'},
-      ).timeout(const Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -75,12 +75,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       debugPrint('Error checking updates: $e');
       if (!mounted) return;
-      final msg = e is Exception
-          ? e.toString().replaceFirst('Exception: ', '')
-          : e.toString();
+      // Show a friendly message instead of raw Dart exception text
+      final String friendlyMsg;
+      final errStr = e.toString().toLowerCase();
+      if (errStr.contains('timeout') || errStr.contains('timedout')) {
+        friendlyMsg = 'Connection timed out. Please check your internet and try again.';
+      } else if (errStr.contains('socketexception') || errStr.contains('failed host lookup') || errStr.contains('network')) {
+        friendlyMsg = 'No internet connection. Please check your network and try again.';
+      } else if (e is Exception) {
+        friendlyMsg = e.toString().replaceFirst('Exception: ', '');
+      } else {
+        friendlyMsg = 'Something went wrong. Please try again later.';
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Update check failed: $msg'),
+          content: Text(friendlyMsg),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

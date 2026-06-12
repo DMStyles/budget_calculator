@@ -326,7 +326,7 @@ class BudgetProvider extends ChangeNotifier {
       final response = await http.get(
         Uri.parse('https://api.github.com/repos/DMStyles/budget_calculator/releases/latest'),
         headers: {'Accept': 'application/vnd.github.v3+json'},
-      ).timeout(const Duration(seconds: 15));
+      ).timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
