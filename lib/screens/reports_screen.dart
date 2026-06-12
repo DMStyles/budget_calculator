@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/budget_provider.dart';
+import '../models/transaction.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -185,6 +186,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
               // Category Breakdown list
               _buildCategoryList(sortedCategories, monthlyExpenses, surfaceColor, outlineColor),
+              const SizedBox(height: 24),
+
+              // Monthly Detailed Transactions List
+              _buildDetailedTransactionsList(monthlyTransactions, surfaceColor, outlineColor),
             ],
             const SizedBox(height: 20),
           ],
@@ -418,6 +423,73 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       backgroundColor: Colors.grey.withValues(alpha: 0.1),
                       valueColor: AlwaysStoppedAnimation<Color>(catColor),
                       minHeight: 8,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+  Widget _buildDetailedTransactionsList(List<TransactionModel> transactions, Color cardBg, Color borderCol) {
+    // Sort transactions by date descending (newest first)
+    final sortedTx = List<TransactionModel>.from(transactions)
+      ..sort((a, b) => b.date.compareTo(a.date));
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20.0),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(28),
+        border: Border.all(color: borderCol),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Detailed Transactions', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          ...sortedTx.map((tx) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final iconColor = tx.isIncome ? Colors.tealAccent.shade400 : Colors.redAccent.shade200;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      tx.isIncome ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                      color: iconColor,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tx.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${tx.category} • ${DateFormat('MMM d').format(tx.date)}',
+                          style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${tx.isIncome ? '+' : '-'}Rs. ${tx.amount.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: tx.isIncome ? Colors.tealAccent.shade400 : Colors.redAccent.shade200,
                     ),
                   ),
                 ],

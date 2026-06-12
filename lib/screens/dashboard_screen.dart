@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../providers/budget_provider.dart';
 import '../widgets/expense_chart.dart';
 import '../widgets/transaction_list.dart';
-import 'add_transaction_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -386,20 +385,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     ],
   ),
 ),
-floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          HapticFeedback.selectionClick();
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (_) => const AddTransactionScreen(),
-            ),
-          );
-        },
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: isDark ? Colors.black : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: const Icon(Icons.add_rounded, size: 28),
-      ),
     );
   }
 }

@@ -6,6 +6,8 @@ import 'providers/budget_provider.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/reports_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/add_transaction_screen.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(
@@ -130,6 +132,23 @@ class _MainNavigationHubState extends State<MainNavigationHub> {
         index: _currentIndex,
         children: _pages,
       ),
+      floatingActionButton: _currentIndex == 0 ? Padding(
+        padding: const EdgeInsets.only(bottom: 40.0), // Push FAB above the glass nav bar
+        child: FloatingActionButton(
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const AddTransactionScreen(),
+              ),
+            );
+          },
+          backgroundColor: theme.colorScheme.primary,
+          foregroundColor: isDark ? Colors.black : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add_rounded, size: 28),
+        ),
+      ) : null,
       bottomNavigationBar: ClipRRect(
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
