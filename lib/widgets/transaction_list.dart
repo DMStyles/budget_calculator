@@ -7,7 +7,9 @@ import '../providers/budget_provider.dart';
 import '../screens/add_transaction_screen.dart';
 
 class TransactionList extends StatelessWidget {
-  const TransactionList({super.key});
+  final int? limit;
+
+  const TransactionList({super.key, this.limit});
 
   IconData _getCategoryIcon(String category) {
     switch (category) {
@@ -68,7 +70,10 @@ class TransactionList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<BudgetProvider>(context);
-    final list = provider.transactions;
+    var list = provider.transactions;
+    if (limit != null && list.length > limit!) {
+      list = list.take(limit!).toList();
+    }
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 

@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
 import '../database/database_helper.dart';
 import '../models/transaction.dart';
 
@@ -261,24 +265,32 @@ class BudgetProvider extends ChangeNotifier {
     }
   }
 
-  // Getters for dashboard metrics
+  // Helper for current month transactions
+  List<TransactionModel> get _currentMonthTransactions {
+    final now = DateTime.now();
+    return _transactions.where((tx) {
+      return tx.date.month == now.month && tx.date.year == now.year;
+    }).toList();
+  }
+
+  // Getters for dashboard metrics (Current Month Only)
   double get totalIncome {
-    return _transactions
+    return _currentMonthTransactions
         .where((tx) => tx.isIncome)
         .fold(0.0, (sum, tx) => sum + tx.amount);
   }
 
   double get totalExpenses {
-    return _transactions
+    return _currentMonthTransactions
         .where((tx) => !tx.isIncome)
         .fold(0.0, (sum, tx) => sum + tx.amount);
   }
 
   double get remainingBalance => totalIncome - totalExpenses;
 
-  // Get total expense spent in a specific category
+  // Get total expense spent in a specific category (Current Month Only)
   double getExpenseSpentForCategory(String category) {
-    return _transactions
+    return _currentMonthTransactions
         .where((tx) => !tx.isIncome && tx.category == category)
         .fold(0.0, (sum, tx) => sum + tx.amount);
   }
@@ -360,5 +372,91 @@ class BudgetProvider extends ChangeNotifier {
       if (latestVal < currentVal) return false;
     }
     return false;
+  }
+
+  // Export Data to CSV
+  Future<void> exportData() async {
+    try {
+      final buffer = StringBuffer();
+      buffer.writeln('ID,Title,Amount,Date,Category,IsIncome');
+      for (var tx in _transactions) {
+        // Escape quotes and commas in title
+        final escapedTitle = tx.title.replaceAll('"', '""');
+        buffer.writeln('${tx.id},"$escapedTitle",${tx.amount},${tx.date.toIso8601String()},"${tx.category}",${tx.isIncome}');
+      }
+      
+      final directory = await getTemporaryDirectory();
+      final file = File('${directory.path}/budget_data_export.csv');
+      await file.writeAsString(buffer.toString());
+      
+      await Share.shareXFiles([XFile(file.path)], subject: 'Budget Data Export');
+    } catch (e) {
+      debugPrint('Export failed: $e');
+      rethrow;
+    }
+  }
+
+  // Import Data from CSV
+  Future<void> importData() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        File file = File(result.files.single.path!);
+        String contents = await file.readAsString();
+        List<String> lines = contents.split('\n');
+        
+        if (lines.isEmpty) return;
+        
+        // Remove header if present
+        if (lines.first.toLowerCase().startsWith('id')) {
+          lines.removeAt(0);
+        }
+
+        int importedCount = 0;
+        for (String line in lines) {
+          if (line.trim().isEmpty) continue;
+          
+          // Basic CSV parsing for the format we exported
+          // Note: This simple parsing might break if title has commas, but since we wrap in quotes, we'd normally need a proper parser.
+          // For simplicity in a basic app, we'll do a simple split or regex if needed.
+          // Since we exported as: ID,"Title",Amount,Date,"Category",IsIncome
+          // A safer regex split that ignores commas inside quotes:
+          var regex = RegExp(r',(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)');
+          List<String> parts = line.split(regex);
+          
+          if (parts.length >= 6) {
+            String title = parts[1].replaceAll('"', '').trim();
+            double amount = double.tryParse(parts[2].trim()) ?? 0.0;
+            DateTime? date = DateTime.tryParse(parts[3].trim());
+            String category = parts[4].replaceAll('"', '').trim();
+            bool isIncome = parts[5].trim().toLowerCase() == 'true';
+            
+            if (date != null && title.isNotEmpty) {
+              final newTx = TransactionModel(
+                title: title,
+                amount: amount,
+                date: date,
+                category: category,
+                isIncome: isIncome,
+              );
+              // Insert into DB directly
+              await DatabaseHelper.instance.insertTransaction(newTx);
+              importedCount++;
+            }
+          }
+        }
+        
+        if (importedCount > 0) {
+          await fetchTransactions(); // Refresh UI
+        }
+      }
+    } catch (e) {
+      debugPrint('Import failed: $e');
+      rethrow;
+    }
   }
 }

@@ -298,6 +298,78 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 24),
 
+            // Settings Group: Data Management
+            _buildSectionHeader('Data Management'),
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: surfaceColor,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: outlineColor),
+              ),
+              child: Column(
+                children: [
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.file_download_rounded, color: Colors.greenAccent.shade400),
+                    ),
+                    title: const Text('Export Data', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Save your transactions as a CSV file'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () async {
+                      try {
+                        await provider.exportData();
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Export failed: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                  _buildDivider(isDark),
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.orangeAccent.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.file_upload_rounded, color: Colors.orangeAccent.shade200),
+                    ),
+                    title: const Text('Import Data', style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: const Text('Restore transactions from a CSV file'),
+                    trailing: const Icon(Icons.chevron_right_rounded),
+                    onTap: () async {
+                      try {
+                        await provider.importData();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Data imported successfully!')),
+                          );
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Import failed: $e')),
+                          );
+                        }
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
             // Settings Group: Updates & Maintenance
             _buildSectionHeader('App Updates'),
             const SizedBox(height: 8),

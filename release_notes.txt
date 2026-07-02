@@ -1,0 +1,10 @@
+## What's New
+
+### Dashboard & Monthly Focus
+- The Home screen now focuses entirely on your **current month's budget**! Balance, Income, Expenses, and Category budgets will now intelligently filter out past data to give you a clear view of where you stand this month.
+- To keep the dashboard clean, the Recent Transactions list is now capped at the 10 most recent entries.
+
+### Data Management
+- We've added a brand new **Data Management** section in the Settings screen!
+- **Export Data**: Bundle all your transactions into a standard CSV file to save or share.
+- **Import Data**: Pick a previously exported CSV file from your phone to easily restore your data back into the app!
