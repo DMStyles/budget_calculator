@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import '../providers/budget_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -43,6 +45,9 @@ class _LoginScreenState extends State<LoginScreen> {
         idToken: idToken,
       );
       
+      if (mounted) {
+        context.read<BudgetProvider>().migrateAndFetch();
+      }
       // Navigate is handled by AuthGate automatically
     } catch (error) {
       if (mounted) {

@@ -54,10 +54,10 @@ class BudgetProvider extends ChangeNotifier {
     _loadCategoriesFromPrefs();
     _loadCategoryBudgetsFromPrefs();
     checkForUpdates(); // Check for updates silently on startup
-    _migrateAndFetch();
+    migrateAndFetch();
   }
   
-  Future<void> _migrateAndFetch() async {
+  Future<void> migrateAndFetch() async {
     _isLoading = true;
     notifyListeners();
     
