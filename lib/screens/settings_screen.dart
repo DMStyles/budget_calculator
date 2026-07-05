@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../providers/budget_provider.dart';
 import 'manage_categories_screen.dart';
 
@@ -220,6 +221,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // User Profile
+            _buildUserProfile(context, theme, isDark),
+
             // Settings Group: Appearance
             _buildSectionHeader('Appearance'),
             const SizedBox(height: 8),
@@ -452,7 +456,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                           ),
                           Text(
-                            'v$_appVersion - Offline First',
+                            'v$_appVersion - Cloud Synced',
                             style: const TextStyle(color: Colors.grey, fontSize: 13),
                           ),
                         ],
@@ -490,6 +494,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildUserProfile(BuildContext context, ThemeData theme, bool isDark) {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) return const SizedBox.shrink();
+
+    final name = user.userMetadata?['full_name'] ?? 'Google User';
+    final email = user.email ?? '';
+    final avatarUrl = user.userMetadata?['avatar_url'];
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E2025) : const Color(0xFFF0F4F9),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+            ),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.2),
+                backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                child: avatarUrl == null ? Icon(Icons.person, color: theme.colorScheme.primary, size: 30) : null,
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    Text(email, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                onPressed: () async {
+                  await Supabase.instance.client.auth.signOut();
+                },
+                tooltip: 'Sign Out',
+              )
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+      ],
     );
   }
 

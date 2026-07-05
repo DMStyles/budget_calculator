@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../database/database_helper.dart';
 import '../models/transaction.dart';
 
@@ -53,6 +54,43 @@ class BudgetProvider extends ChangeNotifier {
     _loadCategoriesFromPrefs();
     _loadCategoryBudgetsFromPrefs();
     checkForUpdates(); // Check for updates silently on startup
+    _migrateAndFetch();
+  }
+  
+  Future<void> _migrateAndFetch() async {
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasMigrated = prefs.getBool('has_migrated_to_supabase') ?? false;
+      
+      if (!hasMigrated && Supabase.instance.client.auth.currentSession != null) {
+        // Try migrating local data
+        try {
+          final localTxs = await DatabaseHelper.instance.getAllTransactions();
+          if (localTxs.isNotEmpty) {
+            final toInsert = localTxs.map((tx) => {
+              'title': tx.title,
+              'amount': tx.amount,
+              'date': tx.date.toIso8601String(),
+              'category': tx.category,
+              'is_income': tx.isIncome,
+            }).toList();
+            
+            await Supabase.instance.client.from('transactions').insert(toInsert);
+          }
+          await prefs.setBool('has_migrated_to_supabase', true);
+        } catch (e) {
+          debugPrint('Migration error: $e');
+        }
+      }
+      
+      await fetchTransactions();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _loadThemeFromPrefs() async {
@@ -139,11 +177,27 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   Future<void> fetchTransactions() async {
+    if (Supabase.instance.client.auth.currentSession == null) return;
+    
     _isLoading = true;
     notifyListeners();
 
     try {
-      _transactions = await DatabaseHelper.instance.getAllTransactions();
+      final response = await Supabase.instance.client
+          .from('transactions')
+          .select()
+          .order('date', ascending: false);
+          
+      _transactions = (response as List).map((json) {
+        return TransactionModel(
+          id: json['id'] as int,
+          title: json['title'] as String,
+          amount: (json['amount'] as num).toDouble(),
+          date: DateTime.parse(json['date'] as String),
+          category: json['category'] as String,
+          isIncome: json['is_income'] as bool,
+        );
+      }).toList();
     } catch (e) {
       debugPrint("Error fetching transactions: $e");
     } finally {
@@ -154,9 +208,28 @@ class BudgetProvider extends ChangeNotifier {
 
   Future<void> addTransaction(TransactionModel transaction) async {
     try {
-      final id = await DatabaseHelper.instance.insertTransaction(transaction);
-      final newTx = transaction.copyWith(id: id);
+      final response = await Supabase.instance.client
+          .from('transactions')
+          .insert({
+            'title': transaction.title,
+            'amount': transaction.amount,
+            'date': transaction.date.toIso8601String(),
+            'category': transaction.category,
+            'is_income': transaction.isIncome,
+          })
+          .select()
+          .single();
+          
+      final newTx = TransactionModel(
+        id: response['id'] as int,
+        title: response['title'] as String,
+        amount: (response['amount'] as num).toDouble(),
+        date: DateTime.parse(response['date'] as String),
+        category: response['category'] as String,
+        isIncome: response['is_income'] as bool,
+      );
       _transactions.insert(0, newTx);
+      _transactions.sort((a, b) => b.date.compareTo(a.date));
       notifyListeners();
     } catch (e) {
       debugPrint("Error adding transaction: $e");
@@ -164,11 +237,23 @@ class BudgetProvider extends ChangeNotifier {
   }
 
   Future<void> updateTransaction(TransactionModel transaction) async {
+    if (transaction.id == null) return;
     try {
-      await DatabaseHelper.instance.updateTransaction(transaction);
+      await Supabase.instance.client
+          .from('transactions')
+          .update({
+            'title': transaction.title,
+            'amount': transaction.amount,
+            'date': transaction.date.toIso8601String(),
+            'category': transaction.category,
+            'is_income': transaction.isIncome,
+          })
+          .eq('id', transaction.id!);
+          
       final index = _transactions.indexWhere((tx) => tx.id == transaction.id);
       if (index != -1) {
         _transactions[index] = transaction;
+        _transactions.sort((a, b) => b.date.compareTo(a.date));
         notifyListeners();
       }
     } catch (e) {
@@ -178,7 +263,11 @@ class BudgetProvider extends ChangeNotifier {
 
   Future<void> deleteTransaction(int id) async {
     try {
-      await DatabaseHelper.instance.deleteTransaction(id);
+      await Supabase.instance.client
+          .from('transactions')
+          .delete()
+          .eq('id', id);
+          
       _transactions.removeWhere((tx) => tx.id == id);
       notifyListeners();
     } catch (e) {
@@ -234,8 +323,16 @@ class BudgetProvider extends ChangeNotifier {
       }
     }
 
-    // Update matching transactions in SQLite database
-    await DatabaseHelper.instance.updateTransactionCategory(oldName, cleanNewName, isIncome);
+    // Update matching transactions in Supabase database
+    try {
+      await Supabase.instance.client
+          .from('transactions')
+          .update({'category': cleanNewName})
+          .eq('category', oldName)
+          .eq('is_income', isIncome);
+    } catch (e) {
+      debugPrint("Error renaming category in Supabase: $e");
+    }
 
     // Sync in-memory transaction list state
     await fetchTransactions();
@@ -256,8 +353,16 @@ class BudgetProvider extends ChangeNotifier {
     }
 
     if (removed) {
-      // Recategorize all transactions belonging to deleted category to 'Other' fallback category
-      await DatabaseHelper.instance.updateTransactionCategory(name, 'Other', isIncome);
+      // Recategorize all transactions belonging to deleted category to 'Other'
+      try {
+        await Supabase.instance.client
+            .from('transactions')
+            .update({'category': 'Other'})
+            .eq('category', name)
+            .eq('is_income', isIncome);
+      } catch (e) {
+        debugPrint("Error recategorizing in Supabase: $e");
+      }
 
       // Sync transactions list state
       await fetchTransactions();
@@ -420,11 +525,6 @@ class BudgetProvider extends ChangeNotifier {
         for (String line in lines) {
           if (line.trim().isEmpty) continue;
           
-          // Basic CSV parsing for the format we exported
-          // Note: This simple parsing might break if title has commas, but since we wrap in quotes, we'd normally need a proper parser.
-          // For simplicity in a basic app, we'll do a simple split or regex if needed.
-          // Since we exported as: ID,"Title",Amount,Date,"Category",IsIncome
-          // A safer regex split that ignores commas inside quotes:
           var regex = RegExp(r',(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)');
           List<String> parts = line.split(regex);
           
@@ -436,16 +536,21 @@ class BudgetProvider extends ChangeNotifier {
             bool isIncome = parts[5].trim().toLowerCase() == 'true';
             
             if (date != null && title.isNotEmpty) {
-              final newTx = TransactionModel(
-                title: title,
-                amount: amount,
-                date: date,
-                category: category,
-                isIncome: isIncome,
-              );
-              // Insert into DB directly
-              await DatabaseHelper.instance.insertTransaction(newTx);
-              importedCount++;
+              // Insert into Supabase directly
+              try {
+                await Supabase.instance.client
+                  .from('transactions')
+                  .insert({
+                    'title': title,
+                    'amount': amount,
+                    'date': date.toIso8601String(),
+                    'category': category,
+                    'is_income': isIncome,
+                  });
+                importedCount++;
+              } catch (e) {
+                debugPrint('Failed to import row: $e');
+              }
             }
           }
         }
